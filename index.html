@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f2eb">
+  <title>ReCee</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f2eb;
+      --surface: #fffefa;
+      --ink: #20231f;
+      --muted: #777b72;
+      --line: #d9d9cf;
+      --green: #264c3b;
+      --green-soft: #e4ece5;
+      --orange: #dc704b;
+      --orange-soft: #f8e7dc;
+      --shadow: 0 18px 50px rgba(32, 35, 31, .09);
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --display: Georgia, "Times New Roman", serif;
+      --sans: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px clamp(18px, 4vw, 56px); border-bottom: 1px solid var(--line); background: rgba(255, 254, 250, .76); }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; color: white; background: var(--green); font-family: var(--display); font-size: 23px; }
+    .brand-name { font-family: var(--display); font-size: 21px; line-height: 1; }
+    .brand-kicker { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); background: var(--surface); font-size: 12px; font-weight: 650; transition: background .18s, border-color .18s, transform .18s; }
+    .button:hover { border-color: #a8ada3; background: #fff; transform: translateY(-1px); }
+    .button.primary { border-color: var(--green); color: #fff; background: var(--green); }
+    .button.primary:hover { background: #1b3e2e; }
+    .button.subtle { border-color: transparent; background: transparent; }
+    .button.danger { color: #9b4832; }
+    .button .icon { font-size: 16px; line-height: 1; }
+    .layout { display: grid; grid-template-columns: minmax(420px, 1.08fr) minmax(360px, .92fr); max-width: 1520px; min-height: calc(100vh - 77px); margin: 0 auto; }
+    .editor { padding: 34px clamp(18px, 4vw, 58px) 60px; }
+    .preview-area { position: relative; padding: 35px clamp(18px, 4vw, 58px) 55px; border-left: 1px solid var(--line); background-color: #ecebe3; background-image: radial-gradient(rgba(38, 76, 59, .07) .7px, transparent .7px); background-size: 13px 13px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 7px; color: var(--orange); font-size: 10px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-family: var(--display); font-size: clamp(28px, 3vw, 38px); font-weight: 400; letter-spacing: -.5px; }
+    h2 { margin: 0; font-family: var(--display); font-size: 23px; font-weight: 400; }
+    .section-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 28px 0 14px; }
+    .section-title-row h2 { font-size: 21px; }
+    .section-title-row .small-label { color: var(--muted); font-size: 11px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 14px; }
+    .field { display: flex; min-width: 0; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label, .label { color: #585d55; font-size: 11px; font-weight: 680; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+      width: 100%; min-width: 0; min-height: 39px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 4px; outline: none; color: var(--ink); background: var(--surface); font-size: 12px; transition: border-color .15s, box-shadow .15s;
+    }
+    textarea { min-height: 68px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(38, 76, 59, .1); }
+    input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--green); }
+    .line-items { overflow-x: auto; border: 1px solid var(--line); border-radius: 5px; background: rgba(255, 254, 250, .82); }
+    .items-head, .item-row { display: grid; grid-template-columns: minmax(95px, 1.25fr) minmax(105px, 1.5fr) 62px 92px 30px; align-items: center; gap: 8px; min-width: 440px; padding: 8px 10px; }
+    .items-head { border-bottom: 1px solid var(--line); color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+    .item-row + .item-row { border-top: 1px solid #eae9e1; }
+    .item-row input { min-height: 35px; padding: 7px 8px; }
+    .item-row .remove-item { display: grid; width: 28px; height: 28px; place-items: center; border: 0; border-radius: 4px; color: #9b4832; background: transparent; font-size: 17px; }
+    .item-row .remove-item:hover { background: var(--orange-soft); }
+    .items-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-top: 1px solid var(--line); }
+    .toggle-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+    .toggle-option { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: rgba(255, 254, 250, .72); }
+    .toggle-option span { flex: 1; font-size: 11px; font-weight: 630; }
+    .addon-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 13px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 5px 5px; background: rgba(255, 254, 250, .72); }
+    .addon-settings:empty { display: none; }
+    .addon-settings .field label { font-size: 10px; }
+    .addon-settings input, .addon-settings select { min-height: 35px; }
+    .upload-row { display: flex; align-items: center; gap: 12px; }
+    .logo-thumb { display: grid; width: 46px; height: 46px; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px dashed #bfc4ba; border-radius: 4px; color: var(--muted); background: #f3f2ed; font-size: 9px; text-align: center; }
+    .logo-thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
+    .upload-label { display: inline-flex; min-height: 34px; align-items: center; padding: 0 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); cursor: pointer; font-size: 11px; font-weight: 650; }
+    .upload-copy { color: var(--muted); font-size: 10px; }
+    .status { min-height: 15px; margin: 12px 0 0; color: var(--muted); font-size: 10px; }
+    .preview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 2px auto 22px; max-width: 390px; }
+    .preview-head h2 { font-size: 23px; }
+    .preview-head p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .paper-wrap { position: relative; max-width: 390px; margin: 0 auto; filter: drop-shadow(0 16px 22px rgba(26, 31, 27, .14)); }
+    .receipt { position: relative; padding: 30px 28px 32px; background: #fffefa; font-family: var(--mono); color: #232722; font-size: 11px; line-height: 1.45; overflow-wrap: anywhere; }
+    .receipt::before, .receipt::after { position: absolute; right: 0; left: 0; height: 7px; content: ""; background-size: 14px 14px; }
+    .receipt::before { top: -6px; background-image: radial-gradient(circle at 7px 7px, #fffefa 6px, transparent 6.5px); }
+    .receipt::after { bottom: -6px; background-image: radial-gradient(circle at 7px 0, #fffefa 6px, transparent 6.5px); }
+    .receipt-brand { text-align: center; }
+    .receipt-logo { display: block; max-width: 85px; max-height: 65px; margin: 0 auto 10px; object-fit: contain; }
+    .receipt-logo[hidden] { display: none; }
+    .receipt-store { margin: 0 0 3px; font-size: 17px; font-weight: 800; letter-spacing: .3px; text-transform: uppercase; }
+    .receipt-address, .receipt-contact { margin: 0; color: #50534e; font-size: 10px; white-space: pre-line; }
+    .receipt hr { height: 1px; margin: 15px 0; border: 0; background: #cacbc3; }
+    .receipt-meta { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; }
+    .receipt-meta span:nth-child(even) { text-align: right; }
+    .receipt-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .receipt-table th { padding: 0 0 7px; border-bottom: 1px dashed #aaa; color: #666a62; font-size: 9px; font-weight: 500; text-align: left; text-transform: uppercase; }
+    .receipt-table th:last-child, .receipt-table td:last-child { text-align: right; }
+    .receipt-table td { padding: 8px 0; vertical-align: top; }
+    .receipt-table .id-cell { width: 24%; color: #6c7069; font-size: 9px; }
+    .receipt-table .name-cell { width: 41%; padding-right: 7px; }
+    .receipt-table .qty-cell { width: 12%; text-align: center; }
+    .receipt-table .price-cell { width: 23%; text-align: right; white-space: nowrap; }
+    .receipt-totals { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; }
+    .receipt-totals span:nth-child(even) { text-align: right; }
+    .receipt-totals .grand { padding-top: 8px; border-top: 1px dashed #aaa; font-size: 14px; font-weight: 800; }
+    .receipt-note { margin: 0; text-align: center; white-space: pre-line; }
+    .signature-space { height: 43px; margin: 13px 0 5px; border-bottom: 1px solid #777; }
+    .receipt-signature p, .receipt-thanks { margin: 0; color: #62665e; font-size: 9px; text-align: center; }
+    .receipt-thanks { margin-top: 14px; }
+    .empty-state { padding: 13px 0; color: #858980; text-align: center; }
+    .footer-note { max-width: 390px; margin: 20px auto 0; color: #777b72; font-size: 10px; line-height: 1.5; text-align: center; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .editor { animation: rise .45s ease both; }
+    .preview-area { animation: rise .55s .05s ease both; }
+    @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } .preview-area { border-top: 1px solid var(--line); border-left: 0; } }
+    @media (max-width: 560px) { .topbar { align-items: flex-start; padding: 14px 16px; } .brand-name { font-size: 18px; } .top-actions { gap: 4px; } .top-actions .button { min-width: 40px; padding: 0 9px; font-size: 0; } .top-actions .button .icon { font-size: 17px; } .layout { min-height: auto; } .editor, .preview-area { padding: 26px 16px 38px; } .fields { grid-template-columns: 1fr 1fr; gap: 12px 9px; } .toggle-list { gap: 7px; } .toggle-option { gap: 6px; padding: 7px; } .toggle-option span { font-size: 10px; } .receipt { padding: 27px 21px 29px; } }
+    @media print {
+      @page { size: 80mm auto; margin: 5mm; }
+      body { background: white !important; }
+      body * { visibility: hidden !important; }
+      #receipt, #receipt * { visibility: visible !important; }
+      #receipt { position: absolute; top: 0; left: 0; width: 70mm; padding: 5mm 3mm; box-shadow: none; font-size: 10pt; }
+      #receipt::before, #receipt::after { display: none; }
+      .topbar, .editor, .preview-head, .footer-note { display: none !important; }
+      .preview-area { padding: 0; border: 0; background: white; }
+      .paper-wrap { max-width: none; margin: 0; filter: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">R</div>
+      <div><div class="brand-name">ReCee</div><span class="brand-kicker">Build a better checkout</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="button" id="importButton" type="button" title="Import a saved configuration"><span class="icon" aria-hidden="true">↥</span>Import</button>
+      <button class="button" id="exportButton" type="button" title="Export configuration"><span class="icon" aria-hidden="true">↧</span>Export config</button>
+      <button class="button primary" id="printButton" type="button" title="Print receipt"><span class="icon" aria-hidden="true">▤</span>Print</button>
+      <input class="file-input" id="configFile" type="file" accept="application/json,.json" aria-label="Import configuration file">
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="editor" aria-labelledby="editorTitle">
+      <div class="section-heading">
+        <div><p class="eyebrow">Receipt builder</p><h1 id="editorTitle">Make it yours.</h1></div>
+      </div>
+
+      <div class="section-title-row"><h2>Business details</h2><span class="small-label">Saved in this browser</span></div>
+      <div class="fields">
+        <div class="field full"><label for="storeName">Place name</label><input id="storeName" type="text" value="FIELDWORK SUPPLY" autocomplete="organization"></div>
+        <div class="field full"><label for="address">Location address</label><textarea id="address" rows="2">48 Orchard Street&#10;Brooklyn, NY 11211</textarea></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" type="text" value="(718) 555-0148" autocomplete="tel"></div>
+        <div class="field"><label for="website">Website / email</label><input id="website" type="text" value="fieldworksupply.co"></div>
+        <div class="field"><label for="receiptNumber">Receipt number</label><input id="receiptNumber" type="text" value="10428"></div>
+        <div class="field"><label for="cashier">Cashier</label><input id="cashier" type="text" value="M. Rivera"></div>
+        <div class="field"><label for="receiptDate">Date</label><input id="receiptDate" type="date"></div>
+        <div class="field"><label for="receiptTime">Time</label><input id="receiptTime" type="time"></div>
+        <div class="field"><label for="currency">Currency</label><select id="currency"><option value="USD">USD $</option><option value="CAD">CAD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="AUD">AUD $</option><option value="JPY">JPY ¥</option></select></div>
+        <div class="field"><label for="paymentMethod">Payment method</label><select id="paymentMethod"><option>Visa •••• 2048</option><option>Cash</option><option>Mastercard •••• 1008</option><option>Amex •••• 0005</option><option>Debit</option><option>Other</option></select></div>
+      </div>
+
+      <div class="section-title-row"><h2>Line items</h2><span class="small-label">ID · item · qty · price</span></div>
+      <div class="line-items">
+        <div class="items-head"><span>Item ID</span><span>Item name</span><span>Qty</span><span>Price</span><span></span></div>
+        <div id="itemRows"></div>
+        <div class="items-foot"><button class="button subtle" id="addItem" type="button"><span class="icon" aria-hidden="true">＋</span>Add item</button><span class="small-label" id="itemCount">2 items</span></div>
+      </div>
+
+      <div class="section-title-row"><h2>Customize receipt</h2></div>
+      <div class="toggle-list" aria-label="Receipt add-ons">
+        <label class="toggle-option"><input id="showItemId" type="checkbox" checked><span>Show item IDs</span></label>
+        <label class="toggle-option"><input id="enableTax" type="checkbox" checked><span>Sales tax</span></label>
+        <label class="toggle-option"><input id="enableTip" type="checkbox"><span>Tip</span></label>
+        <label class="toggle-option"><input id="enableSignature" type="checkbox" checked><span>Signature spot</span></label>
+        <label class="toggle-option"><input id="enableLogo" type="checkbox" checked><span>Business logo</span></label>
+        <label class="toggle-option"><input id="enableNote" type="checkbox" checked><span>Footer message</span></label>
+      </div>
+      <div class="addon-settings" id="addonSettings">
+        <div class="field" id="taxField"><label for="taxRate">Tax rate (%)</label><input id="taxRate" type="number" min="0" max="100" step="0.01" value="8.875"></div>
+        <div class="field" id="tipField"><label for="tipRate">Tip rate (%)</label><input id="tipRate" type="number" min="0" max="100" step="0.1" value="18"></div>
+        <div class="field full" id="logoField">
+          <label>Logo image</label>
+          <div class="upload-row"><div class="logo-thumb" id="logoThumb">No logo</div><label class="upload-label" for="logoUpload">Choose image</label><input class="file-input" id="logoUpload" type="file" accept="image/*"><span class="upload-copy">PNG, JPG, or WebP</span></div>
+        </div>
+        <div class="field full" id="noteField"><label for="footerMessage">Footer message</label><textarea id="footerMessage" rows="2">Thanks for shopping small. See you again soon.</textarea></div>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite">Changes save automatically on this device.</p>
+    </section>
+
+    <section class="preview-area" aria-labelledby="previewTitle">
+      <div class="preview-head">
+        <div><p class="eyebrow">Live preview</p><h2 id="previewTitle">Your receipt</h2><p>Updates as you edit</p></div>
+        <button class="button" id="previewPrint" type="button" title="Print receipt"><span class="icon" aria-hidden="true">▤</span>Print</button>
+      </div>
+      <div class="paper-wrap">
+        <article class="receipt" id="receipt" aria-label="Receipt preview">
+          <div class="receipt-brand">
+            <img id="receiptLogo" class="receipt-logo" alt="Business logo" hidden>
+            <h3 class="receipt-store" id="previewStoreName">FIELDWORK SUPPLY</h3>
+            <p class="receipt-address" id="previewAddress"></p>
+            <p class="receipt-contact" id="previewContact"></p>
+          </div>
+          <hr>
+          <div class="receipt-meta" id="previewMeta"></div>
+          <hr>
+          <table class="receipt-table">
+            <thead><tr><th class="id-cell" id="previewIdHead">ID</th><th class="name-cell">Item</th><th class="qty-cell">Qty</th><th class="price-cell">Total</th></tr></thead>
+            <tbody id="previewItems"></tbody>
+          </table>
+          <hr>
+          <div class="receipt-totals" id="previewTotals"></div>
+          <div id="previewSignature" class="receipt-signature"><hr><div class="signature-space"></div><p>Customer signature</p></div>
+          <div id="previewThanks" class="receipt-thanks">Thanks for shopping small.<br>See you again soon.</div>
+        </article>
+      </div>
+      <p class="footer-note">Your receipt configuration is saved locally in this browser. Export a config file to back it up or move it to another device.</p>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const defaults = {
+        storeName: "FIELDWORK SUPPLY", address: "48 Orchard Street\nBrooklyn, NY 11211", phone: "(718) 555-0148", website: "fieldworksupply.co",
+        receiptNumber: "10428", cashier: "M. Rivera", currency: "USD", paymentMethod: "Visa •••• 2048",
+        items: [{ id: "FW-204", name: "Canvas market tote", qty: 1, price: 24 }, { id: "FW-118", name: "Field notes, set of 3", qty: 2, price: 8.5 }],
+        showItemId: true, enableTax: true, taxRate: 8.875, enableTip: false, tipRate: 18, enableSignature: true,
+        enableLogo: true, enableNote: true, footerMessage: "Thanks for shopping small. See you again soon.", logo: ""
+      };
+      const $ = (id) => document.getElementById(id);
+      const inputIds = ["storeName", "address", "phone", "website", "receiptNumber", "cashier", "currency", "paymentMethod", "showItemId", "enableTax", "taxRate", "enableTip", "tipRate", "enableSignature", "enableLogo", "enableNote", "footerMessage"];
+      let state = structuredClone(defaults);
+      let logoData = "";
+
+      function todayLocal() {
+        const now = new Date();
+        const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return { date: localDate.toISOString().slice(0, 10), time: localDate.toISOString().slice(11, 16) };
+      }
+      const current = todayLocal();
+      $("receiptDate").value = current.date;
+      $("receiptTime").value = current.time;
+
+      function readForm() {
+        inputIds.forEach((id) => {
+          const element = $(id);
+          state[id] = element.type === "checkbox" ? element.checked : element.value;
+        });
+        state.taxRate = numberValue("taxRate");
+        state.tipRate = numberValue("tipRate");
+        state.receiptDate = $("receiptDate").value;
+        state.receiptTime = $("receiptTime").value;
+        state.items = [...document.querySelectorAll(".item-row")].map((row) => ({
+          id: row.querySelector("[data-key='id']").value,
+          name: row.querySelector("[data-key='name']").value,
+          qty: Math.max(0, numberValueFrom(row.querySelector("[data-key='qty']"))),
+          price: Math.max(0, numberValueFrom(row.querySelector("[data-key='price']")))
+        }));
+        state.logo = logoData;
+      }
+      function numberValue(id) { return Math.max(0, Number.parseFloat($(id).value) || 0); }
+      function numberValueFrom(element) { return Number.parseFloat(element.value) || 0; }
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+      }
+      function money(amount) {
+        const currency = $("currency").value || "USD";
+        try { return new Intl.NumberFormat(undefined, { style: "currency", currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: currency === "JPY" ? 0 : 2 }).format(amount); }
+        catch { return `${currency} ${amount.toFixed(2)}`; }
+      }
+      function renderRows(items = state.items) {
+        $("itemRows").innerHTML = "";
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "item-row";
+          row.innerHTML = `<input type="text" data-key="id" aria-label="Item ID" placeholder="ID" value="${escapeHtml(item.id)}"><input type="text" data-key="name" aria-label="Item name" placeholder="Item name" value="${escapeHtml(item.name)}"><input type="number" data-key="qty" aria-label="Quantity" min="0" step="1" value="${escapeHtml(item.qty)}"><input type="number" data-key="price" aria-label="Unit price" min="0" step="0.01" value="${escapeHtml(item.price)}"><button class="remove-item" type="button" aria-label="Remove item" title="Remove item">×</button>`;
+          row.addEventListener("input", update);
+          row.querySelector(".remove-item").addEventListener("click", () => { row.remove(); update(); });
+          $("itemRows").append(row);
+        });
+        update();
+      }
+      function render() {
+        const setText = (id, value) => { $(id).textContent = value; };
+        setText("previewStoreName", $("storeName").value.trim() || "Your business name");
+        $("previewAddress").textContent = $("address").value.trim();
+        $("previewContact").textContent = [$("phone").value.trim(), $("website").value.trim()].filter(Boolean).join(" · ");
+        $("previewIdHead").hidden = !$("showItemId").checked;
+        const items = [...document.querySelectorAll(".item-row")].map((row) => ({
+          id: row.querySelector("[data-key='id']").value.trim(), name: row.querySelector("[data-key='name']").value.trim(),
+          qty: Math.max(0, numberValueFrom(row.querySelector("[data-key='qty']"))), price: Math.max(0, numberValueFrom(row.querySelector("[data-key='price']")))
+        }));
+        const visibleItems = items.filter((item) => item.name || item.id);
+        $("itemCount").textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
+        $("previewItems").innerHTML = visibleItems.length ? visibleItems.map((item) => `<tr>${$("showItemId").checked ? `<td class="id-cell">${escapeHtml(item.id || "—")}</td>` : ""}<td class="name-cell">${escapeHtml(item.name || "Item")}</td><td class="qty-cell">${item.qty}</td><td class="price-cell">${money(item.qty * item.price)}</td></tr>`).join("") : `<tr><td class="empty-state" colspan="4">No items added</td></tr>`;
+        const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
+        const tax = $("enableTax").checked ? subtotal * numberValue("taxRate") / 100 : 0;
+        const tip = $("enableTip").checked ? subtotal * numberValue("tipRate") / 100 : 0;
+        const total = subtotal + tax + tip;
+        const lines = [
+          ["Subtotal", money(subtotal), false],
+          ...($("enableTax").checked ? [[`Tax (${numberValue("taxRate").toFixed(2).replace(/\.00$/, "") }%)`, money(tax), false]] : []),
+          ...($("enableTip").checked ? [[`Tip (${numberValue("tipRate").toFixed(1).replace(/\.0$/, "") }%)`, money(tip), false]] : []),
+          ["Total", money(total), true]
+        ];
+        $("previewTotals").innerHTML = lines.map(([label, amount, grand]) => `<span class="${grand ? "grand" : ""}">${label}</span><span class="${grand ? "grand" : ""}">${amount}</span>`).join("");
+        const date = $("receiptDate").value;
+        const formattedDate = date ? new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
+        const meta = [["Receipt", $("receiptNumber").value.trim()], ["Date", [formattedDate, $("receiptTime").value].filter(Boolean).join(" · ")], ["Cashier", $("cashier").value.trim()], ["Paid by", $("paymentMethod").value]];
+        $("previewMeta").innerHTML = meta.filter(([, value]) => value).map(([label, value]) => `<span>${label}</span><span>${escapeHtml(value)}</span>`).join("");
+        $("previewSignature").hidden = !$("enableSignature").checked;
+        $("previewThanks").hidden = !$("enableNote").checked || !$("footerMessage").value.trim();
+        $("previewThanks").textContent = $("footerMessage").value.trim();
+        const logo = $("receiptLogo");
+        logo.hidden = !$("enableLogo").checked || !logoData;
+        if (logoData) logo.src = logoData;
+        $("taxField").hidden = !$("enableTax").checked;
+        $("tipField").hidden = !$("enableTip").checked;
+        $("logoField").hidden = !$("enableLogo").checked;
+        $("noteField").hidden = !$("enableNote").checked;
+        $("logoThumb").innerHTML = logoData ? `<img src="${logoData}" alt="Uploaded logo">` : "No logo";
+      }
+      let saveTimer;
+      function update() {
+        readForm();
+        render();
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          try { localStorage.setItem("receipt-studio-config", JSON.stringify(state)); }
+          catch { $("status").textContent = "Could not save locally. Export your config to keep a copy."; return; }
+          $("status").textContent = "Changes saved on this device.";
+        }, 150);
+      }
+      function printReceipt() {
+        const { date, time } = todayLocal();
+        $("receiptDate").value = date;
+        $("receiptTime").value = time;
+        update();
+        window.print();
+      }
+      function applyConfig(config) {
+        const merged = { ...defaults, ...config };
+        inputIds.forEach((id) => {
+          if (merged[id] === undefined) return;
+          if ($(id).type === "checkbox") $(id).checked = Boolean(merged[id]);
+          else $(id).value = String(merged[id]);
+        });
+        ["receiptDate", "receiptTime"].forEach((id) => { if (merged[id]) $(id).value = merged[id]; });
+        logoData = typeof merged.logo === "string" && merged.logo.startsWith("data:image/") ? merged.logo : "";
+        state = merged;
+        renderRows(Array.isArray(merged.items) ? merged.items : []);
+      }
+      document.querySelectorAll(".editor input:not([type='file']), .editor select, .editor textarea").forEach((element) => element.addEventListener("input", update));
+      $("addItem").addEventListener("click", () => {
+        const items = [...document.querySelectorAll(".item-row")].map((row) => ({ id: row.querySelector("[data-key='id']").value, name: row.querySelector("[data-key='name']").value, qty: row.querySelector("[data-key='qty']").value, price: row.querySelector("[data-key='price']").value }));
+        items.push({ id: "", name: "", qty: 1, price: 0 });
+        renderRows(items);
+        document.querySelector("#itemRows .item-row:last-child [data-key='id']").focus();
+      });
+      $("logoUpload").addEventListener("change", (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith("image/")) { $("status").textContent = "Choose an image file for the logo."; return; }
+        if (file.size > 2 * 1024 * 1024) { $("status").textContent = "Logo must be 2 MB or smaller."; return; }
+        const reader = new FileReader();
+        reader.addEventListener("load", () => { logoData = String(reader.result); update(); });
+        reader.readAsDataURL(file);
+      });
+      $("exportButton").addEventListener("click", () => {
+        readForm();
+        const blob = new Blob([JSON.stringify({ format: "receipt-studio", version: 1, ...state }, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${(state.storeName || "receipt-config").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "receipt-config"}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        $("status").textContent = "Configuration exported as a JSON file.";
+      });
+      $("importButton").addEventListener("click", () => $("configFile").click());
+      $("configFile").addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const config = JSON.parse(await file.text());
+          if (!config || typeof config !== "object" || (config.items !== undefined && !Array.isArray(config.items))) throw new Error("Invalid configuration");
+          applyConfig(config);
+          update();
+          $("status").textContent = "Configuration imported and saved on this device.";
+        } catch { $("status").textContent = "That file could not be imported. Choose a ReCee JSON configuration."; }
+        event.target.value = "";
+      });
+      ["printButton", "previewPrint"].forEach((id) => $(id).addEventListener("click", printReceipt));
+
+      try {
+        const saved = localStorage.getItem("receipt-studio-config");
+        if (saved) applyConfig(JSON.parse(saved));
+        else renderRows(defaults.items);
+      } catch {
+        renderRows(defaults.items);
+        $("status").textContent = "Saved settings could not be read; starting with the sample receipt.";
+      }
+    })();
+  </script>
+</body>
+</html>
